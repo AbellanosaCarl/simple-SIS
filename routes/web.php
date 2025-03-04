@@ -18,28 +18,27 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
+    
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// Admin routes
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.adminDashboard');
-
     Route::get('/admin/add-student', [AdminController::class, 'showAddStudentForm'])->name('admin.add-student');
     Route::post('/admin/add-student', [AdminController::class, 'storeStudent'])->name('admin.store-student');
+
     Route::get('/students', [StudentController::class, 'index'])->name('students.index');
     Route::get('/students/{student}/edit', [StudentController::class, 'edit'])->name('students.edit');
     Route::put('/students/{student}', [StudentController::class, 'update'])->name('students.update');
-    
-
     Route::delete('/students/{student}', [StudentController::class, 'destroy'])->name('students.destroy');
 });
+Route::post('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
 
 
-// Student routes
-Route::resource('students', StudentController::class);
+
+
 Route::delete('enrollments/{student}/{subject}', [EnrollmentController::class, 'destroy'])->name('enrollments.destroy');
 
     

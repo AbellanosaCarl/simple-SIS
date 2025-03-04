@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
         // Run the student seeder
         $this->call([
             StudentSeeder::class,
+            SubjectsTableSeeder::class,
         ]);
     }
 }

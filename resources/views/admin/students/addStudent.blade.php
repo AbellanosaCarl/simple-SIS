@@ -25,7 +25,6 @@
         </div>
     @endif
 
-    <!-- Create Subject Form -->
     <form method="POST" action="{{ route('admin.store-student') }}">
         @csrf
         <div class="form-group">
@@ -39,21 +38,9 @@
         </div>
 
         <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" name="password" id="password" class="form-control" required>
-        </div>
-
-        <div class="form-group">
-            <label for="password_confirmation">Confirm Password</label>
-            <input type="password" name="password_confirmation" id="password_confirmation" class="form-control" required>
-        </div>
-
-
-        <div class="form-group">
             <label for="age">Age</label>
             <input type="number" name="age" id="age" class="form-control" required value="{{ old('age') }}" min="10">
         </div>
-
 
         <div class="form-group">
             <label for="year_level">Year Level</label>
@@ -65,6 +52,17 @@
                 <option value="4">4th Year</option>
             </select>
         </div>
+        <div class="form-group">
+    <label for="course">Course</label>
+    <select name="course" id="course" class="form-control" required>
+        <option value="" selected disabled>Select Course</option>
+        <option value="BSIT">Bachelor of Science in Information Technology</option>
+        <option value="BSCS">Bachelor of Science in Computer Science</option>
+        <option value="BSIS">Bachelor of Science in Information Systems</option>
+        <option value="BSEMC">Bachelor of Science in Entertainment and Multimedia Computing</option>
+        <!-- Add more courses as needed -->
+    </select>
+</div>
 
         <button type="submit" class="btn btn-primary">Add Student</button>
     </form>

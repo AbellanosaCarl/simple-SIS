@@ -26,46 +26,81 @@
     @endif
 
     <!-- Create Subject Form -->
-    <form method="POST" action="{{ route('admin.store-student') }}">
-        @csrf
-        <div class="form-group">
-            <label for="name">Student Name</label>
-            <input type="text" name="name" id="name" class="form-control" required value="{{ old('name') }}">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Subject Information</h6>
         </div>
+        <div class="card-body">
+            <form method="POST" action="{{ route('subjects.store') }}">
+                @csrf
 
-        <div class="form-group">
-            <label for="email">Student Email</label>
-            <input type="email" name="email" id="email" class="form-control" required value="{{ old('email') }}">
+                <!-- Add Course Selection -->
+                <div class="form-group">
+                    <label for="course">Course <span class="text-danger">*</span></label>
+                    <select class="form-control @error('course') is-invalid @enderror" 
+                            id="course" name="course" required>
+                        <option value="" selected disabled>Select a Course</option>
+                        <option value="BSIT" {{ old('course') == 'BSIT' ? 'selected' : '' }}>Bachelor of Science in Information Technology</option>
+                        <option value="BSCS" {{ old('course') == 'BSCS' ? 'selected' : '' }}>Bachelor of Science in Computer Science</option>
+                        <option value="BSIS" {{ old('course') == 'BSIS' ? 'selected' : '' }}>Bachelor of Science in Information Systems</option>
+                        <option value="BSEMC" {{ old('course') == 'BSEMC' ? 'selected' : '' }}>Bachelor of Science in Entertainment and Multimedia Computing</option>
+                    </select>
+                    @error('course')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="code">Subject Code <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control @error('code') is-invalid @enderror" 
+                           id="code" name="code" value="{{ old('code') }}" required
+                           placeholder="Enter subject code (e.g., MATH101)">
+                    @error('code')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                    <small class="form-text text-muted">Only letters, numbers, and hyphens are allowed.</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="name">Subject Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control @error('name') is-invalid @enderror" 
+                           id="name" name="name" value="{{ old('name') }}" required>
+                    @error('name')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="units">Units <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control @error('units') is-invalid @enderror" 
+                           id="units" name="units" value="{{ old('units') }}" required
+                           min="1" max="6">
+                    @error('units')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea class="form-control @error('description') is-invalid @enderror" 
+                              id="description" name="description" rows="3"
+                              placeholder="Enter subject description (optional)">{{ old('description') }}</textarea>
+                    @error('description')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save fa-sm text-white-50 mr-1"></i>
+                        Save Subject
+                    </button>
+                    <a href="{{ route('subjects.index') }}" class="btn btn-secondary">
+                        <i class="fas fa-times fa-sm text-white-50 mr-1"></i>
+                        Cancel
+                    </a>
+                </div>
+            </form>
         </div>
-
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" name="password" id="password" class="form-control" required>
-        </div>
-
-        <div class="form-group">
-            <label for="password_confirmation">Confirm Password</label>
-            <input type="password" name="password_confirmation" id="password_confirmation" class="form-control" required>
-        </div>
-
-
-        <div class="form-group">
-            <label for="age">Age</label>
-            <input type="number" name="age" id="age" class="form-control" required value="{{ old('age') }}" min="10">
-        </div>
-
-
-        <div class="form-group">
-            <label for="year_level">Year Level</label>
-            <select name="year_level" id="year_level" class="form-control" required>
-                <option value="" selected disabled>Select Year Level</option>
-                <option value="1">1st Year</option>
-                <option value="2">2nd Year</option>
-                <option value="3">3rd Year</option>
-                <option value="4">4th Year</option>
-            </select>
-        </div>
-
-        <button type="submit" class="btn btn-primary">Add Student</button>
-    </form>
+    </div>
 @endsection

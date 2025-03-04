@@ -14,15 +14,15 @@ class Student extends Model
     protected $fillable = [
         'user_id',
         'age',
-        'address',
-        'year_level'
+        'year_level',
+        'course'
     ];
 
-    public function user(): BelongsTo
+    public function user()
     {
         return $this->belongsTo(User::class);
     }
-
+    
     public function subjects(): BelongsToMany
     {
         return $this->belongsToMany(Subject::class, 'student_subjects')

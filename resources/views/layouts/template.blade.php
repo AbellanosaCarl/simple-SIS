@@ -33,10 +33,10 @@
 
             <!-- Sidebar - Brand -->
             <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
-                <div class="sidebar-brand-icon rotate-n-15">
-                    <i class="fas fa-laugh-wink"></i>
+                <div class="sidebar-brand-icon">
+                <img src="{{ asset('img/logo.png') }}" alt="Logo" class="img-fluid">
                 </div>
-                <div class="sidebar-brand-text mx-3">{{ config('app.name') }}</div>
+                <div class="sidebar-brand-text mx-3">BUKSU SIAS STUDENT</div>
             </a>
 
             <!-- Divider -->
@@ -48,6 +48,7 @@
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span></a>
             </li>
+
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
 
@@ -91,6 +92,10 @@
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Logout
                                 </a>
+                                <a class="nav-link" href="#" data-toggle="modal" data-target="#profileModal">
+    <i class="fas fa-user-circle"></i>
+    <span>My Profile</span>
+</a>
                             </div>
                         </li>
 
@@ -128,6 +133,83 @@
     <a class="scroll-to-top rounded" href="#page-top">
         <i class="fas fa-angle-up"></i>
     </a>
+<!-- Profile Modal -->
+<div class="modal fade" id="profileModal" tabindex="-1" role="dialog" aria-labelledby="profileModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="profileModalLabel">My Profile</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="profileForm">
+                    @csrf
+                    <div class="form-group">
+                        <label><strong>Name:</strong></label>
+                        <input type="text" class="form-control" id="name" value="{{ Auth::user()->name }}" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label><strong>Email:</strong></label>
+                        <input type="email" class="form-control" id="email" value="{{ Auth::user()->email }}" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label><strong>Password:</strong></label>
+                        <input type="password" class="form-control" id="password" value="********" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label><strong>Year Level:</strong></label>
+                        <input type="text" class="form-control" id="year_level" value="{{ Auth::user()->year_level ?? 'N/A' }}" disabled>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="editProfileBtn">Edit Profile</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+$(document).ready(function () {
+    $('#editProfileBtn').click(function () {
+        let isDisabled = $('#name').prop('disabled');
+        $('#name, #email, #password, #year_level').prop('disabled', !isDisabled);
+
+        if (!isDisabled) {
+            // If editing is enabled, show a save button
+            $(this).text('Save Changes').removeClass('btn-primary').addClass('btn-success');
+
+            $(this).off('click').on('click', function () {
+                let formData = {
+                    _token: $('input[name="_token"]').val(),
+                    name: $('#name').val(),
+                    email: $('#email').val(),
+                    password: $('#password').val() !== '********' ? $('#password').val() : null,
+                    year_level: $('#year_level').val()
+                };
+
+                $.ajax({
+                    url: "{{ route('profile.update') }}",
+                    type: "POST",
+                    data: formData,
+                    success: function (response) {
+                        alert('Profile updated successfully!');
+                        location.reload(); // Reload page to reflect changes
+                    },
+                    error: function (xhr) {
+                        alert('Error updating profile. Please try again.');
+                    }
+                });
+            });
+        } else {
+            $(this).text('Edit Profile').removeClass('btn-success').addClass('btn-primary');
+        }
+    });
+});
+</script>
+
 
     <!-- Logout Modal-->
     <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"

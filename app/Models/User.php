@@ -15,7 +15,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'is_admin',
+        'age',
+        'year_level',
+        'course',
+        'is_admin'
     ];
 
     protected $hidden = [
@@ -31,6 +34,6 @@ class User extends Authenticatable
 
     public function student()
     {
-        return $this->hasOne(Student::class, 'user_id');
+        return $this->hasOne(Student::class);
     }
 }

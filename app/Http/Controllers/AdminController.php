@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use App\Models\Student;
+use Illuminate\Support\Str;
 
 class AdminController extends Controller
 {
@@ -24,32 +25,36 @@ class AdminController extends Controller
         return view('admin.students.addStudent');
     }
 
-    // Store Student Data
     public function storeStudent(Request $request)
     {
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|confirmed|min:6',
-            'age' => 'required|integer|min:10',
-            'year_level' => 'required|integer|between:1,4',
+            'age' => 'required|numeric|min:10',
+            'year_level' => 'required|in:1,2,3,4',
+            'course' => 'required|string',  // Make sure course is required
         ]);
     
-        // Create User
+        // Generate a random password
+        $password = 'pass123';
+    
+        // Create user first
         $user = User::create([
             'name' => $validatedData['name'],
             'email' => $validatedData['email'],
-            'password' => bcrypt($validatedData['password']),
-            'role' => 'student', // Ensure role is set
+            'password' => Hash::make($password),
+            'is_admin' => false
         ]);
     
-        // Create Student
-        Student::create([
+        // Create associated student record - make sure to include course
+        $student = Student::create([
             'user_id' => $user->id,
             'age' => $validatedData['age'],
             'year_level' => $validatedData['year_level'],
+            'course' => $validatedData['course']  // Add this line
         ]);
     
-        return redirect()->back()->with('success', 'Student added successfully!');
+        return redirect()->route('students.index')
+            ->with('success', "Student created successfully. Generated password: $password");
     }
 }

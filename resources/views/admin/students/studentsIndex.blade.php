@@ -43,6 +43,7 @@
                             <th>Email</th>
                             <th>Age</th>
                             <th>Year Level</th>
+                            <th>Course</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -53,6 +54,7 @@
                                 <td>{{ $student->user->email }}</td>
                                 <td>{{ $student->age }}</td>
                                 <td>{{ $student->year_level }}</td>
+                                <td>{{ $student->course }}</td>
                                 <td>
                                     <a href="{{ route('enroll.create', $student) }}" class="btn btn-success btn-sm">
                                         <i class="fas fa-user-plus"></i>
