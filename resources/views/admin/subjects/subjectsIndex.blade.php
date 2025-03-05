@@ -29,6 +29,7 @@
                             <th>Name</th>
                             <th>Units</th>
                             <th>Description</th>
+                            <th>Enrolled Students</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -39,6 +40,7 @@
                                 <td>{{ $subject->name }}</td>
                                 <td>{{ $subject->units }}</td>
                                 <td>{{ $subject->description }}</td>
+                                <td>{{ $subject->students()->count() }}</td>
                                 <td>
                                     <div class="btn-group" role="group">
                                         <button type="button" class="btn btn-primary btn-sm" 
@@ -46,14 +48,10 @@
                                                 data-target="#editSubjectModal{{ $subject->id }}">
                                             <i class="fas fa-edit"></i> Edit
                                         </button>
-                                        <form action="{{ route('subjects.destroy', $subject) }}" method="POST" class="d-inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm" 
-                                                    onclick="return confirm('Are you sure you want to delete this subject?')">
-                                                <i class="fas fa-trash"></i> Delete
-                                            </button>
-                                        </form>
+                                        <button type="button" class="btn btn-danger btn-sm" 
+                                                onclick="deleteSubject({{ $subject->id }})">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -63,9 +61,16 @@
             </div>
         </div>
     </div>
+
+    <!-- Hidden Delete Form -->
+    <form id="deleteForm" method="POST" style="display: none;">
+        @csrf
+        @method('DELETE')
+    </form>
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     $(document).ready(function() {
         $('#dataTable').DataTable();
@@ -79,5 +84,41 @@
             @endif
         @endif
     });
+
+    function deleteSubject(subjectId) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const form = document.getElementById('deleteForm');
+                form.action = `/subjects/${subjectId}`;
+                form.submit();
+            }
+        });
+    }
+
+    // Show success message if it exists in session
+    @if(session('success'))
+        Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: '{{ session('success') }}'
+        });
+    @endif
+
+    // Show error message if it exists in session
+    @if(session('error'))
+        Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: '{{ session('error') }}'
+        });
+    @endif
 </script>
 @endpush
