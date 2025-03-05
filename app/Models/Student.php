@@ -28,6 +28,49 @@ class Student extends Model
         return $this->belongsToMany(Subject::class, 'student_subjects')
             ->withPivot('grade')
             ->withTimestamps();
-            return $this->hasMany(Subject::class, 'student_id');
+    }
+
+    public function getGradeAverage()
+    {
+        $validGrades = $this->subjects()
+            ->get()
+            ->filter(function ($subject) {
+                // Only include numeric grades (exclude INC and null)
+                return $subject->pivot->grade !== null && 
+                       $subject->pivot->grade !== 'INC' && 
+                       is_numeric($subject->pivot->grade);
+            })
+            ->map(function ($subject) {
+                // Convert to float
+                return (float) $subject->pivot->grade;
+            });
+
+        if ($validGrades->isEmpty()) {
+            return 'N/A';
+        }
+
+        // Calculate average manually to avoid type issues
+        $sum = $validGrades->sum();
+        $count = $validGrades->count();
+        $average = $sum / $count;
+
+        return number_format($average, 2);
+    }
+
+    // Add a helper method to get grade status
+    public function getGradeStatus()
+    {
+        $average = $this->getGradeAverage();
+        
+        if ($average === 'N/A') {
+            return 'Not Available';
+        }
+        
+        $numericAverage = (float) $average;
+        if ($numericAverage <= 3.0) {
+            return 'Passed';
+        }
+        
+        return 'Failed';
     }
 }

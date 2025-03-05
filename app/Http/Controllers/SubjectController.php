@@ -95,19 +95,20 @@ class SubjectController extends Controller
      */
     public function destroy(Subject $subject)
     {
-        // Check if any students are enrolled in this subject
-        if ($subject->students()->exists()) {
-            return redirect()->route('subjects.index')
-                ->with('error', 'Cannot delete subject. There are students currently enrolled in this subject.');
-        }
-
         try {
+            // Check if any students are enrolled in this subject with grades
+            if ($subject->students()->wherePivotNotNull('grade')->exists()) {
+                return back()->with('error', 'Cannot delete subject. There are students with grades in this subject.');
+            }
+    
+            // Remove all enrollments without grades first
+            $subject->students()->wherePivot('grade', null)->detach();
+            
+            // Now delete the subject
             $subject->delete();
-            return redirect()->route('subjects.index')
-                ->with('success', 'Subject deleted successfully.');
+            return back()->with('success', 'Subject deleted successfully.');
         } catch (\Exception $e) {
-            return redirect()->route('subjects.index')
-                ->with('error', 'Failed to delete subject. Please try again.');
+            return back()->with('error', 'Failed to delete subject. Please try again.');
         }
     }
 }

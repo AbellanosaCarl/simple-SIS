@@ -1,5 +1,7 @@
 @extends('layouts.template')
-
+@section('title')
+<title>BUKSU SIAS</title>
+@endsection
 @section('content')
 <!-- Begin Page Content -->
 <div class="container-fluid">
@@ -47,14 +49,11 @@
                                 Average Grade</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
                                 @php
-                                    $student = auth()->user()->student;
-                                    $average = 'N/A';
-                                    if ($student && $student->subjects->isNotEmpty()) {
-                                        $grades = $student->subjects->pluck('pivot.grade')->filter();
-                                        $average = $grades->count() > 0 ? number_format($grades->average(), 2) : 'N/A';
-                                    }
+                                    $average = auth()->user()->student->getGradeAverage();
                                 @endphp
-                                {{ $average }}
+                                <span class="badge {{ $average === 'N/A' ? 'badge-secondary' : 'badge-info' }}">
+                                    {{ $average }}
+                                </span>
                             </div>
                         </div>
                         <div class="col-auto">
@@ -73,52 +72,77 @@
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                @if(auth()->user()->student && auth()->user()->student->subjects->isNotEmpty())
-                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                        <thead>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Subject Code</th>
+                            <th>Subject Name</th>
+                            <th>Units</th>
+                            <th>Description</th>
+                            <th>Grade</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach(auth()->user()->student->subjects as $subject)
                             <tr>
-                                <th>Code</th>
-                                <th>Subject Name</th>
-                                <th>Units</th>
-                                <th>Description</th>
-                                <th>Grade</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach(auth()->user()->student->subjects as $subject)
-                                <tr>
-                                    <td>{{ $subject->code }}</td>
-                                    <td>{{ $subject->name }}</td>
-                                    <td>{{ $subject->units }}</td>
-                                    <td>{{ Str::limit($subject->description, 50) }}</td>
-                                    <td>
-                                        @if($subject->pivot->grade)
-                                            <span class="badge badge-info">{{ $subject->pivot->grade }}</span>
-                                        @else
-                                            <span class="badge badge-secondary">Not Graded</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @if($subject->pivot->grade)
+                                <td>{{ $subject->code }}</td>
+                                <td>{{ $subject->name }}</td>
+                                <td>{{ $subject->units }}</td>
+                                <td>{{ Str::limit($subject->description, 50) }}</td>
+                                <td>
+                                    @if($subject->pivot->grade)
+                                        <span class="badge badge-info">
                                             @if($subject->pivot->grade === 'INC')
-                                                <span class="badge badge-secondary">Pending</span>
-                                            @elseif($subject->pivot->grade <= 3.0)
-                                                <span class="badge badge-success">Passed</span>
+                                                INC
                                             @else
-                                                <span class="badge badge-danger">Failed</span>
+                                                {{ number_format((float)$subject->pivot->grade, 1) }}
                                             @endif
+                                        </span>
+                                    @else
+                                        <span class="badge badge-secondary">Not Graded</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($subject->pivot->grade)
+                                        @if($subject->pivot->grade === 'INC')
+                                            <span class="badge badge-warning">Incomplete</span>
+                                        @elseif((float)$subject->pivot->grade <= 3.0)
+                                            <span class="badge badge-success">Passed</span>
                                         @else
-                                            <span class="badge badge-warning">Ongoing</span>
+                                            <span class="badge badge-danger">Failed</span>
                                         @endif
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                @else
-                    <p class="text-center text-muted">No enrolled subjects found.</p>
-                @endif
+                                    @else
+                                        <span class="badge badge-secondary">Ongoing</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="4" class="text-right"><strong>General Average:</strong></td>
+                            <td>
+                                @php
+                                    $average = auth()->user()->student->getGradeAverage();
+                                @endphp
+                                <span class="badge {{ $average === 'N/A' ? 'badge-secondary' : 'badge-info' }}">
+                                    {{ $average }}
+                                </span>
+                            </td>
+                            <td>
+                                @php
+                                    $status = auth()->user()->student->getGradeStatus();
+                                @endphp
+                                <span class="badge 
+                                    {{ $status === 'Passed' ? 'badge-success' : 
+                                       ($status === 'Failed' ? 'badge-danger' : 'badge-secondary') }}">
+                                    {{ $status }}
+                                </span>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
             </div>
         </div>
     </div>

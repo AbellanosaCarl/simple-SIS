@@ -4,11 +4,19 @@
 @endsection
 @section('adminContent')
     @include('components.delete-confirmation-modal', ['item' => 'student'])
+    @include('admin.students.add-student-modal')
+    @foreach($students as $student)
+        @include('admin.students.edit-student-modal', ['student' => $student])
+    @endforeach
+
+    <div id="modalContainer"></div>
 
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Students Management</h1>
-        <a href="{{ route('admin.add-student') }}" class="btn btn-primary">Add Student</a>
+        <button class="btn btn-primary" data-toggle="modal" data-target="#addStudentModal">
+            <i class="fas fa-plus fa-sm text-white-50"></i> Add Student
+        </button>
     </div>
 
     @if(session('success'))
@@ -56,38 +64,44 @@
                                 <td>{{ $student->year_level }}</td>
                                 <td>{{ $student->course }}</td>
                                 <td>
-                                    <a href="{{ route('enroll.create', $student) }}" class="btn btn-success btn-sm">
-                                        <i class="fas fa-user-plus"></i>
-                                    </a>
-                                    <a href="{{ route('grades.edit', $student) }}" class="btn btn-warning btn-sm">
-                                        <i class="fas fa-graduation-cap"></i>
-                                    </a>
-                                    <!-- Added Edit Button -->
-                                    <a href="{{ route('students.edit', $student) }}" class="btn btn-info btn-sm">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <form action="{{ route('students.destroy', $student) }}" method="POST" class="d-inline delete-form">
-                                        @csrf
-                                        @method('DELETE')
-                                        @if($student->subjects()->exists())
-                                            <button type="button" 
-                                                    class="btn btn-danger btn-sm" 
-                                                    disabled 
-                                                    data-toggle="tooltip" 
-                                                    data-placement="top" 
-                                                    title="Cannot delete student with enrolled subjects">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        @else
-                                            <button type="button" 
-                                                    class="btn btn-danger btn-sm delete-btn" 
-                                                    data-toggle="modal" 
-                                                    data-target="#deleteConfirmationModal"
-                                                    data-form-id="{{ $student->id }}">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        @endif
-                                    </form>
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-primary btn-sm" 
+                                                data-toggle="modal" 
+                                                data-target="#editStudentModal{{ $student->id }}">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </button>
+                                        <button type="button" class="btn btn-info btn-sm enroll-btn" 
+                                                data-student-id="{{ $student->id }}">
+                                            <i class="fas fa-book"></i> Enroll
+                                        </button>
+                                        <button type="button" class="btn btn-success btn-sm grade-btn" 
+                                                data-student-id="{{ $student->id }}">
+                                            <i class="fas fa-graduation-cap"></i> Grades
+                                        </button>
+                                        <form action="{{ route('students.destroy', $student) }}" 
+                                              method="POST" class="d-inline delete-form">
+                                            @csrf
+                                            @method('DELETE')
+                                            @if($student->subjects()->exists())
+                                                <button type="button" 
+                                                        class="btn btn-danger btn-sm" 
+                                                        disabled 
+                                                        data-toggle="tooltip" 
+                                                        data-placement="top" 
+                                                        title="Cannot delete student with enrolled subjects">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            @else
+                                                <button type="button" 
+                                                        class="btn btn-danger btn-sm delete-btn" 
+                                                        data-toggle="modal" 
+                                                        data-target="#deleteConfirmationModal"
+                                                        data-form-id="{{ $student->id }}">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            @endif
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach
@@ -143,6 +157,34 @@
             // When modal is hidden, clear the stored form
             $('#deleteConfirmationModal').on('hidden.bs.modal', function() {
                 formToSubmit = null;
+            });
+
+            // Clear form when modal is closed
+            $('#addStudentModal').on('hidden.bs.modal', function () {
+                $(this).find('form')[0].reset();
+                $('.is-invalid').removeClass('is-invalid');
+                $('.invalid-feedback').remove();
+            });
+
+            // Handle validation errors
+            @if($errors->any())
+                $('#addStudentModal').modal('show');
+            @endif
+
+            $('.enroll-btn').click(function() {
+                var studentId = $(this).data('student-id');
+                $.get(`/enroll/modal/${studentId}`, function(response) {
+                    $('#modalContainer').html(response);
+                    $('#enrollStudentModal' + studentId).modal('show');
+                });
+            });
+
+            $('.grade-btn').click(function() {
+                var studentId = $(this).data('student-id');
+                $.get(`/grades/modal/${studentId}`, function(response) {
+                    $('#modalContainer').html(response);
+                    $('#gradeStudentModal' + studentId).modal('show');
+                });
             });
         });
     </script>

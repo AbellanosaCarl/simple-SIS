@@ -21,11 +21,10 @@ class EnrollmentController extends Controller
      */
     public function create(Student $student)
     {
-        // Get subjects that the student is not enrolled in
-        $availableSubjects = Subject::whereNotIn('id', $student->subjects->pluck('id'))
-            ->get();
-
-        return view('admin.enrollments.createForm', compact('student', 'availableSubjects'));
+        $availableSubjects = Subject::whereNotIn('id', $student->subjects->pluck('id'))->get();
+        return response()->json([
+            'html' => view('components.enroll-student-modal', compact('student', 'availableSubjects'))->render()
+        ]);
     }
 
     /**
@@ -109,5 +108,11 @@ class EnrollmentController extends Controller
             return redirect()->back()
                 ->with('error', 'An error occurred while removing the subject. Please try again.');
         }
+    }
+
+    public function getEnrollModal(Student $student)
+    {
+        $availableSubjects = Subject::whereNotIn('id', $student->subjects->pluck('id'))->get();
+        return view('admin.enrollments.enroll-student-modal', compact('student', 'availableSubjects'));
     }
 }

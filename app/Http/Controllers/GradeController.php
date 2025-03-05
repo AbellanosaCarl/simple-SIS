@@ -55,13 +55,21 @@ class GradeController extends Controller
     {
         $request->validate([
             'grades' => 'required|array',
-            'grades.*' => 'nullable|numeric|min:1|max:5|regex:/^[1-5](\.[0-9])?$/', // Allows 1.0 to 5.0 with one decimal place
+            'grades.*' => [
+                'nullable',
+                'regex:/^([1-5](\.[0-9])?|INC)$/',
+            ],
         ], [
-            'grades.*.regex' => 'Grades must be between 1.0 and 5.0 with one decimal place only.'
+            'grades.*.regex' => 'Grades must be between 1.0 and 5.0 with one decimal place, or INC.'
         ]);
 
         foreach ($request->grades as $subjectId => $grade) {
-            $student->subjects()->updateExistingPivot($subjectId, ['grade' => $grade]);
+            // Format the grade to ensure it has one decimal place
+            $formattedGrade = $grade === 'INC' ? 'INC' : number_format((float)$grade, 1);
+            
+            $student->subjects()->updateExistingPivot($subjectId, [
+                'grade' => $formattedGrade
+            ]);
         }
 
         return redirect()->back()->with('success', 'Grades updated successfully.');
@@ -73,5 +81,11 @@ class GradeController extends Controller
     public function destroy(Grade $grade)
     {
         //
+    }
+
+    public function getGradeModal(Student $student)
+    {
+        $student->load('subjects');
+        return view('admin.grades.grade-student-modal', compact('student'));
     }
 }

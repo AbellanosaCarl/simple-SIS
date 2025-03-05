@@ -14,6 +14,9 @@ Route::get('/', function () {
 
 
 Route::get('/dashboard', function () {
+    if (auth()->user()->is_admin) {
+        return redirect()->route('admin.adminDashboard');
+    }
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -33,6 +36,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/students/{student}/edit', [StudentController::class, 'edit'])->name('students.edit');
     Route::put('/students/{student}', [StudentController::class, 'update'])->name('students.update');
     Route::delete('/students/{student}', [StudentController::class, 'destroy'])->name('students.destroy');
+
+    Route::get('/enroll/modal/{student}', [EnrollmentController::class, 'getEnrollModal'])->name('enroll.modal');
+    Route::get('/grades/modal/{student}', [GradeController::class, 'getGradeModal'])->name('grades.modal');
 });
 Route::post('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
 
